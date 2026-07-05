@@ -111,6 +111,6 @@ async def login(
         user.username,
         user.id,
         user.role,
-        timedelta(minutes=20),
+        timedelta(minutes=1000),
     )
     return {"access_token": token, "token_type": "bearer"}
