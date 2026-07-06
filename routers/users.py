@@ -17,6 +17,10 @@ class ChangePasswordRequest(BaseModel):
     new_password: str = Field(min_length=6)
 
 
+class UpdatePhoneNumberRequest(BaseModel):
+    phone_number: str
+
+
 def get_db():
     db = SessionLocal()
     try:
@@ -40,6 +44,7 @@ async def get_user_details(current_user: user_dependency, db: db_dependency):
         "name": user.first_name + " " + user.last_name,
         "email": user.email,
         "role": user.role,
+        "phone_number": user.phone_number,
     }
 
 
@@ -72,4 +77,21 @@ async def change_password(
     )
 
     db.add(user_details)
+    db.commit()
+
+
+@router.patch("/phone_number", status_code=status.HTTP_200_OK)
+async def update_phone_number(
+    db: db_dependency,
+    current_user: user_dependency,
+    phone_number_request: UpdatePhoneNumberRequest,
+):
+    user = db.query(Users).filter(Users.id == current_user.get("id")).first()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    user.phone_number = phone_number_request.phone_number
+
+    db.add(user)
     db.commit()
